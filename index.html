@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trissomia do X (47,XXX)</title>
+<style>
+/* ===== Tokens: 4 cores principais ===== */
+:root{
+  --bg:#14112B;        /* índigo-noite */
+  --pri:#8B6CFF;       /* violeta principal */
+  --acc:#FFC857;       /* âmbar: destaque */
+  --txt:#F5F3FF;       /* branco-lavanda */
+  --mut:#B9B3D6;
+  --card:rgba(255,255,255,.07);
+  --line:rgba(255,255,255,.14);
+  --bar:56px;
+  /* u = 1% da largura do palco (16:9) */
+  --u:calc(min(100vw,(100dvh - var(--bar))*16/9)/100);
+}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%;background:#0c0a1d;color:var(--txt);
+  font-family:"Segoe UI",Inter,Roboto,system-ui,sans-serif;overflow:hidden}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+
+/* ===== Palco 16:9 ===== */
+.wrap{height:calc(100dvh - var(--bar));display:grid;place-items:center}
+.stage{position:relative;width:calc(var(--u)*100);height:calc(var(--u)*56.25);overflow:hidden;
+  background:radial-gradient(60% 80% at 85% 10%,rgba(139,108,255,.28),transparent 60%),
+             radial-gradient(40% 50% at 0% 100%,rgba(255,200,87,.08),transparent 60%),var(--bg)}
+.slide{position:absolute;inset:0;padding:4.5*1px;padding:calc(var(--u)*4.2) calc(var(--u)*5.5) calc(var(--u)*3.4);
+  display:flex;flex-direction:column;justify-content:center;gap:calc(var(--u)*2);
+  opacity:0;visibility:hidden;transform:translateX(3%);transition:opacity .5s,transform .5s,visibility .5s}
+.slide.active{opacity:1;visibility:visible;transform:none}
+.slide.past{transform:translateX(-3%)}
+
+/* ===== Tipografia ===== */
+h1{font-size:calc(var(--u)*6.6);line-height:1.02;font-weight:800;letter-spacing:-.02em}
+h2{font-size:calc(var(--u)*3.8);line-height:1.08;font-weight:800;letter-spacing:-.015em}
+h3{font-size:calc(var(--u)*1.9);font-weight:700;line-height:1.2}
+p,li{font-size:calc(var(--u)*1.6);line-height:1.4;color:var(--mut)}
+.lead{font-size:calc(var(--u)*2);color:var(--txt)}
+.sm{font-size:calc(var(--u)*1.2)}
+b,.hl{color:var(--acc);font-weight:700}
+.big{font-size:calc(var(--u)*9);font-weight:800;line-height:1;color:var(--acc);letter-spacing:-.03em}
+
+/* ===== Layout ===== */
+.cols{display:grid;grid-template-columns:repeat(var(--c,2),1fr);gap:calc(var(--u)*2.2);align-items:stretch}
+.card{background:var(--card);border:1px solid var(--line);border-radius:calc(var(--u)*1.2);padding:calc(var(--u)*1.8);
+  display:flex;flex-direction:column;gap:calc(var(--u)*.7)}
+.card.key{border-color:var(--acc);background:rgba(255,200,87,.09)}
+.tag{display:inline-block;padding:.25em .8em;border-radius:99px;background:rgba(139,108,255,.25);
+  border:1px solid var(--pri);font-size:calc(var(--u)*1.2);color:var(--txt)}
+ul{list-style:none;padding:0;display:grid;gap:calc(var(--u)*.7)}
+li::before{content:"";display:inline-block;width:.55em;height:.55em;border-radius:50%;background:var(--pri);margin-right:.6em}
+.chips{display:flex;flex-wrap:wrap;gap:calc(var(--u)*.7)}
+
+/* ===== X em círculos ===== */
+.xs{display:flex;gap:calc(var(--u)*1.2);align-items:center}
+.x{width:calc(var(--u)*9);height:calc(var(--u)*9);border-radius:50%;display:grid;place-items:center;
+  font-size:calc(var(--u)*4.6);font-weight:800;background:var(--pri);color:#fff;position:relative}
+.x.off{background:transparent;border:2px dashed var(--mut);color:var(--mut)}
+.xs.sm .x{width:calc(var(--u)*6);height:calc(var(--u)*6);font-size:calc(var(--u)*3)}
+.x small{position:absolute;bottom:-1.8em;font-size:calc(var(--u)*1.1);font-weight:600;color:var(--mut);white-space:nowrap}
+
+/* ===== Fluxo ===== */
+.flow{display:grid;gap:calc(var(--u)*1)}
+.step{display:flex;gap:calc(var(--u)*1.2);align-items:center;background:var(--card);border:1px solid var(--line);
+  border-radius:calc(var(--u)*1);padding:calc(var(--u)*1.1) calc(var(--u)*1.4)}
+.step i{font-style:normal;flex:none;width:calc(var(--u)*3);height:calc(var(--u)*3);border-radius:50%;background:var(--pri);
+  display:grid;place-items:center;font-weight:800;font-size:calc(var(--u)*1.5)}
+.step code{display:block;font-size:calc(var(--u)*1.7);color:var(--acc);font-weight:700;font-family:inherit}
+
+/* ===== Pessoas, rosca, intervalo, tabela ===== */
+.people{display:grid;grid-template-columns:repeat(10,1fr);gap:calc(var(--u)*.8)}
+.people svg{width:100%;height:auto;fill:rgba(255,255,255,.2)}
+.people svg.on{fill:var(--acc);transform:scale(1.15)}
+.donut{width:calc(var(--u)*13);aspect-ratio:1;border-radius:50%;margin:auto;position:relative;cursor:pointer;
+  background:conic-gradient(var(--acc) 0 var(--p,10%),rgba(255,255,255,.14) 0);transition:--p .3s}
+.donut::after{content:attr(data-v);position:absolute;inset:18%;border-radius:50%;background:#1d1940;display:grid;
+  place-items:center;font-size:calc(var(--u)*3);font-weight:800;color:var(--acc)}
+.track{position:relative;height:calc(var(--u)*2);border-radius:99px;background:rgba(255,255,255,.14);margin:calc(var(--u)*1.2) 0 .4em}
+.range{position:absolute;top:0;bottom:0;left:33.3%;width:33.3%;border-radius:99px;background:var(--acc);
+  transform-origin:left;animation:grow 1s .4s both}
+.scale{display:flex;justify-content:space-between}
+@keyframes grow{from{transform:scaleX(0)}}
+table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:calc(var(--u)*.55) calc(var(--u)*.6);font-size:calc(var(--u)*1.2);border-bottom:1px solid var(--line);color:var(--mut)}
+th{color:var(--txt)}
+tr.me td{color:var(--acc);font-weight:700}
+
+/* ===== Linha do tempo ===== */
+.tl{display:grid;gap:calc(var(--u)*1.2);border-left:3px solid var(--pri);padding-left:calc(var(--u)*1.6)}
+.tl div{position:relative}
+.tl div::before{content:"";position:absolute;left:calc(var(--u)*-2.1);top:.35em;width:calc(var(--u)*1.1);height:calc(var(--u)*1.1);
+  border-radius:50%;background:var(--acc)}
+
+/* ===== Cards clicáveis ===== */
+button.card{text-align:left;transition:transform .2s,border-color .2s}
+button.card:hover{transform:translateY(-4px);border-color:var(--pri)}
+.ico{font-size:calc(var(--u)*3.4);line-height:1}
+.more{font-size:calc(var(--u)*1.2);color:var(--pri);font-weight:700}
+dialog{margin:auto;max-width:min(560px,90vw);border:1px solid var(--acc);border-radius:16px;background:#1d1940;color:var(--txt);padding:24px}
+dialog::backdrop{background:rgba(0,0,0,.6)}
+dialog h3{font-size:22px;margin-bottom:8px}
+dialog p{font-size:17px;margin-bottom:16px}
+dialog button{padding:8px 18px;border-radius:99px;border:1px solid var(--pri);background:var(--pri)}
+
+/* ===== Animações discretas ===== */
+.slide.active .a{animation:rise .6s both;animation-delay:calc(var(--i,0)*.12s + .15s)}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ===== Barra de controle ===== */
+.bar{position:fixed;left:0;right:0;bottom:0;height:var(--bar);display:flex;align-items:center;justify-content:center;gap:12px;
+  background:#0c0a1d;border-top:1px solid var(--line);z-index:5}
+.bar button{height:38px;min-width:38px;padding:0 14px;border-radius:99px;border:1px solid var(--line);background:var(--card)}
+.bar button:hover{border-color:var(--pri)}
+#count{min-width:56px;text-align:center;font-weight:700;color:var(--acc)}
+.prog{position:fixed;top:0;left:0;height:4px;background:var(--acc);transition:width .4s;z-index:6}
+.menu{position:fixed;bottom:var(--bar);left:50%;transform:translateX(-50%);background:#1d1940;border:1px solid var(--line);
+  border-radius:12px;padding:8px;display:none;z-index:7;max-height:60dvh;overflow:auto;min-width:240px}
+.menu.open{display:block}
+.menu button{display:block;width:100%;text-align:left;padding:8px 12px;border:0;background:none;border-radius:8px;font-size:15px}
+.menu button:hover,.menu button.cur{background:rgba(139,108,255,.3)}
+a{color:var(--acc)}
+
+/* ===== Responsivo: telas verticais/estreitas ===== */
+@media (max-aspect-ratio:1/1),(max-width:700px){
+  :root{--u:2.4vw}
+  .wrap{display:block}
+  .stage{width:100vw;height:calc(100dvh - var(--bar))}
+  .slide{overflow-y:auto;justify-content:flex-start;padding:5vw}
+  .cols{grid-template-columns:1fr}
+  .people{grid-template-columns:repeat(5,1fr)}
+  .big{font-size:calc(var(--u)*7)}
+}
+</style>
+</head>
+<body>
+<div class="prog" id="prog"></div>
+
+<!-- Ícone de pessoa reutilizável -->
+<svg width="0" height="0" style="position:absolute"><symbol id="p" viewBox="0 0 24 40"><circle cx="12" cy="8" r="6"/><path d="M3 38V22a9 9 0 0 1 18 0v16z"/></symbol></svg>
+
+<div class="wrap"><main class="stage" id="stage">
+
+<!-- 1. CAPA -->
+<section class="slide" data-title="Capa">
+  <div class="cols" style="--c:2;align-items:center">
+    <div style="display:grid;gap:calc(var(--u)*1.6)">
+      <span class="tag a" style="--i:0;justify-self:start">Genética · 1ª série Ômega</span>
+      <h1 class="a" style="--i:1">Trissomia do X</h1>
+      <p class="lead a" style="--i:2">Um cromossomo X a mais: o que é, como surge e por que passa despercebido.</p>
+      <p class="a" style="--i:3"><b>Alice · Daniel · Eduarda · Nátaly</b><br>Turma: 1ª série Ômega</p>
+    </div>
+    <div class="a" style="--i:2;display:grid;justify-items:center;gap:calc(var(--u)*4)">
+      <div class="xs"><div class="x">X<small>ativo</small></div><div class="x off">X<small>inativo</small></div><div class="x off">X<small>inativo</small></div></div>
+      <h2 style="color:var(--acc)">47,XXX</h2>
+    </div>
+  </div>
+</section>
+
+<!-- 2. INTRODUÇÃO -->
+<section class="slide" data-title="Introdução">
+  <h2 class="a">O que é a trissomia do X?</h2>
+  <div class="cols">
+    <div style="display:grid;gap:calc(var(--u)*1.4);align-content:start">
+      <p class="lead a" style="--i:1">Alteração cromossômica numérica: existe <b>um X extra</b> em indivíduos do sexo feminino.</p>
+      <div class="cols a" style="--i:2;--c:2">
+        <div class="card"><span class="sm">Padrão</span><h3 style="font-size:calc(var(--u)*3.2)">46,XX</h3><p class="sm">2 cromossomos X</p></div>
+        <div class="card key"><span class="sm">Trissomia do X</span><h3 style="font-size:calc(var(--u)*3.2);color:var(--acc)">47,XXX</h3><p class="sm">3 cromossomos X</p></div>
+      </div>
+      <p class="sm a" style="--i:3">Também chamada de síndrome do triplo X (Triple X). Não há Y: o desenvolvimento é feminino.</p>
+    </div>
+    <div class="card key a" style="--i:2;justify-content:center;align-items:center;text-align:center">
+      <span class="lead">Ocorre em cerca de</span>
+      <span class="big">1 em 1.000</span>
+      <span class="lead">nascimentos femininos</span>
+    </div>
+  </div>
+</section>
+
+<!-- 3. PROBLEMA -->
+<section class="slide" data-title="Problema: subdiagnóstico">
+  <h2 class="a">A questão: quase ninguém sabe que tem</h2>
+  <p class="lead a" style="--i:1">Só cerca de <b>1 em cada 10</b> mulheres com 47,XXX recebe o diagnóstico.</p>
+  <div class="people a" style="--i:2" id="people" aria-label="1 de 10 pessoas diagnosticada"></div>
+  <div class="cols" style="--c:3">
+    <div class="card a" style="--i:3"><span class="ico">🩺</span><h3>Sinais leves</h3><p class="sm">Muitas pessoas têm poucas ou nenhuma característica.</p></div>
+    <div class="card a" style="--i:4"><span class="ico">🙂</span><h3>Sem traços marcantes</h3><p class="sm">Raramente há má-formações graves ou face típica.</p></div>
+    <div class="card key a" style="--i:5"><span class="ico">🔎</span><h3>Por que importa</h3><p class="sm">Diagnóstico ajuda a acompanhar fala, aprendizagem e saúde.</p></div>
+  </div>
+</section>
+
+<!-- 4. DESENVOLVIMENTO -->
+<section class="slide" data-title="Como surge e como age">
+  <h2 class="a">Como surge e por que o efeito é leve</h2>
+  <div class="cols">
+    <div class="flow">
+      <h3 class="a">1. Origem: não-disjunção na meiose</h3>
+      <div class="step a" style="--i:1"><i>1</i><div>Os dois X não se separam<code>XX → XX + Ø</code></div></div>
+      <div class="step a" style="--i:2"><i>2</i><div>Óvulo XX encontra espermatozoide X<code>XX + X</code></div></div>
+      <div class="step a" style="--i:3"><i>3</i><div>Zigoto com 3 cromossomos X<code>47,XXX</code></div></div>
+      <p class="sm a" style="--i:4">Quase sempre acontece ao acaso. Aumenta com a idade materna.</p>
+    </div>
+    <div class="card a" style="--i:2;align-items:center;justify-content:center;text-align:center;gap:calc(var(--u)*3)">
+      <h3>2. Inativação do cromossomo X</h3>
+      <div class="xs sm"><div class="x">X<small>ativo</small></div><div class="x off">X<small>Barr</small></div><div class="x off">X<small>Barr</small></div></div>
+      <p class="lead" style="margin-top:calc(var(--u)*1)">2 dos 3 X ficam <b>quase todos desligados</b>. Alguns genes escapam e podem causar efeitos.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 5. DADOS -->
+<section class="slide" data-title="Dados e comparações">
+  <h2 class="a">Os números</h2>
+  <div class="cols" style="--c:3">
+    <div class="card a" style="--i:1;align-items:center;text-align:center">
+      <h3>Diagnosticadas</h3>
+      <div class="donut" id="donut" data-v="10%" title="Clique para alternar" tabindex="0" role="button"></div>
+      <p class="sm">Clique: <b>10%</b> com diagnóstico / <b>90%</b> sem</p>
+    </div>
+    <div class="card a" style="--i:2">
+      <h3>Mosaicismo</h3>
+      <p class="sm">46,XX / 47,XXX: algumas células têm 2 X, outras 3 X.</p>
+      <div class="track" title="10 a 20% dos casos"><div class="range"></div></div>
+      <div class="scale sm"><span>0%</span><span class="hl">10–20% dos casos</span><span>30%</span></div>
+    </div>
+    <div class="card a" style="--i:3">
+      <h3>Comparando aneuploidias</h3>
+      <table>
+        <tr><th>Condição</th><th>Cariótipo</th><th>Alteração</th></tr>
+        <tr><td>Normal feminino</td><td>46,XX</td><td>2 X</td></tr>
+        <tr class="me"><td>Trissomia do X</td><td>47,XXX</td><td>X extra</td></tr>
+        <tr><td>Turner</td><td>45,X</td><td>X ausente</td></tr>
+        <tr><td>Klinefelter</td><td>47,XXY</td><td>X extra + Y</td></tr>
+        <tr><td>Down</td><td>47,+21</td><td>21 extra</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- 6. EXEMPLOS -->
+<section class="slide" data-title="Exemplos">
+  <h2 class="a">Como a condição é descoberta</h2>
+  <p class="a" style="--i:1">Clique em um cenário para ver o detalhe.</p>
+  <div class="cols" style="--c:3">
+    <button class="card a" style="--i:2" data-k="pre"><span class="ico">🤰</span><h3>Achado pré-natal</h3><p>Exame genético por idade materna revela 47,XXX.</p><span class="more">Ver detalhes</span></button>
+    <button class="card a" style="--i:3" data-k="inf"><span class="ico">🧒</span><h3>Primeira infância</h3><p>Fala tardia, motricidade fina e altura acima da média.</p><span class="more">Ver detalhes</span></button>
+    <button class="card a" style="--i:4" data-k="adu"><span class="ico">👩</span><h3>Vida adulta</h3><p>Sem sintomas; descoberta ao acaso em exames.</p><span class="more">Ver detalhes</span></button>
+  </div>
+  <div class="chips a" style="--i:5"><span class="tag">Estatura alta</span><span class="tag">Atraso na fala</span><span class="tag">Hipotonia</span><span class="tag">Ansiedade</span><span class="tag">Dificuldades de aprendizagem</span></div>
+</section>
+
+<!-- 7. PONTOS PRINCIPAIS -->
+<section class="slide" data-title="Pontos principais">
+  <h2 class="a">O que levar daqui</h2>
+  <div class="cols" style="--c:3">
+    <div class="card key a" style="--i:1"><h3 style="font-size:calc(var(--u)*3);color:var(--acc)">47,XXX</h3><p>Três X em vez de dois, sem cromossomo Y.</p></div>
+    <div class="card a" style="--i:2"><h3>Não-disjunção</h3><p>Erro na separação dos cromossomos, geralmente no óvulo.</p></div>
+    <div class="card a" style="--i:3"><h3>Inativação do X</h3><p>Explica por que o impacto é mais leve que o de trissomias autossômicas.</p></div>
+    <div class="card a" style="--i:4"><h3>Muito variável</h3><p>De nenhum sinal a atrasos de fala e aprendizagem.</p></div>
+    <div class="card a" style="--i:5"><h3>Fertilidade</h3><p>Em geral puberdade normal e fertilidade preservada.</p></div>
+    <div class="card key a" style="--i:6"><h3 style="font-size:calc(var(--u)*3);color:var(--acc)">~10%</h3><p>é o que recebe diagnóstico.</p></div>
+  </div>
+</section>
+
+<!-- 8. CONCLUSÃO -->
+<section class="slide" data-title="Conclusão">
+  <div class="cols">
+    <div style="display:grid;gap:calc(var(--u)*1.6);align-content:center">
+      <h2 class="a">Conclusão</h2>
+      <p class="lead a" style="--i:1">A trissomia do X é uma alteração <b>comum, discreta e pouco diagnosticada</b>.</p>
+      <ul class="a" style="--i:2"><li>Origem: erro na divisão celular</li><li>Efeito suavizado pela inativação do X</li><li>Informação ajuda a acompanhar cada pessoa</li></ul>
+      <div class="card key a" style="--i:3"><h3 style="color:var(--acc)">Um X a mais não define quem a pessoa é.</h3></div>
+    </div>
+    <div class="tl a" style="--i:2;align-self:center">
+      <div><b>1959</b><p class="sm">Patricia Jacobs descreve o 1º caso, em Edimburgo.</p></div>
+      <div><b>Depois</b><p class="sm">Termo “superfêmea” é abandonado: impreciso e estigmatizante.</p></div>
+      <div><b>Hoje</b><p class="sm">Cariótipo e testes pré-natais (NIPT) identificam o 47,XXX.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 9. REFERÊNCIAS -->
+<section class="slide" data-title="Referências">
+  <h2 class="a">Referências</h2>
+  <div class="cols" style="--c:1">
+    <div class="card a" style="--i:1"><h3>MedlinePlus (NIH / Biblioteca Nacional de Medicina dos EUA)</h3><p class="sm"><a href="https://medlineplus.gov/" target="_blank" rel="noopener">https://medlineplus.gov/</a></p></div>
+    <div class="card a" style="--i:2"><h3>PubMed Central (PMC)</h3><p class="sm"><a href="https://pmc.ncbi.nlm.nih.gov/" target="_blank" rel="noopener">https://pmc.ncbi.nlm.nih.gov/</a></p></div>
+    <div class="card a" style="--i:3"><h3>Jacobs P. A. e colaboradores (1959)</h3><p class="sm">Primeiro caso descrito de mulher com cariótipo 47,XXX.</p></div>
+  </div>
+  <p class="sm a" style="--i:4">Sem imagens externas: ícones e gráficos criados em HTML, CSS e SVG. Obrigado!</p>
+</section>
+
+</main></div>
+
+<nav class="bar" aria-label="Navegação">
+  <button id="prev" aria-label="Slide anterior">◀</button>
+  <span id="count" aria-live="polite">1 / 9</span>
+  <button id="next" aria-label="Próximo slide">▶</button>
+  <button id="mbtn" aria-label="Menu de slides">☰ Slides</button>
+</nav>
+<div class="menu" id="menu"></div>
+
+<dialog id="dlg"><h3 id="dt"></h3><p id="dp"></p><button id="dc">Fechar</button></dialog>
+
+<script>
+/* ===== Navegação ===== */
+const slides=[...document.querySelectorAll('.slide')], N=slides.length;
+const count=document.getElementById('count'), prog=document.getElementById('prog'),
+      menu=document.getElementById('menu'), dlg=document.getElementById('dlg');
+let cur=0;
+
+function go(n){
+  cur=Math.max(0,Math.min(N-1,n));
+  slides.forEach((s,i)=>{s.classList.toggle('active',i===cur);s.classList.toggle('past',i<cur);s.scrollTop=0});
+  count.textContent=`${cur+1} / ${N}`;
+  prog.style.width=((cur+1)/N*100)+'%';
+  [...menu.children].forEach((b,i)=>b.classList.toggle('cur',i===cur));
+  history.replaceState(null,'','#'+(cur+1));
+}
+document.getElementById('prev').onclick=()=>go(cur-1);
+document.getElementById('next').onclick=()=>go(cur+1);
+
+/* Menu de slides */
+slides.forEach((s,i)=>{const b=document.createElement('button');b.textContent=`${i+1}. ${s.dataset.title}`;
+  b.onclick=()=>{go(i);menu.classList.remove('open')};menu.appendChild(b)});
+document.getElementById('mbtn').onclick=e=>{e.stopPropagation();menu.classList.toggle('open')};
+document.addEventListener('click',e=>{if(!menu.contains(e.target))menu.classList.remove('open')});
+
+/* Teclado: setas, Page Up/Down, espaço, Home/End */
+document.addEventListener('keydown',e=>{
+  if(dlg.open)return;
+  if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();go(cur+1)}
+  else if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();go(cur-1)}
+  else if(e.key==='Home')go(0); else if(e.key==='End')go(N-1);
+  else if(e.key==='Escape')menu.classList.remove('open');
+});
+
+/* Gesto de deslizar (celular) */
+let tx=null;
+document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX},{passive:true});
+document.addEventListener('touchend',e=>{if(tx===null)return;const d=e.changedTouches[0].clientX-tx;
+  if(Math.abs(d)>60)go(cur+(d<0?1:-1));tx=null});
+
+/* ===== Slide 3: 10 pessoas, 1 diagnosticada ===== */
+const ppl=document.getElementById('people');
+for(let i=0;i<10;i++){ppl.insertAdjacentHTML('beforeend',`<svg viewBox="0 0 24 40" class="${i===0?'on':''}"><use href="#p"/></svg>`)}
+
+/* ===== Slide 5: rosca interativa ===== */
+const donut=document.getElementById('donut');let dgn=true;
+function flip(){dgn=!dgn;donut.style.setProperty('--p',dgn?'10%':'90%');donut.dataset.v=dgn?'10%':'90%'}
+donut.onclick=flip;donut.onkeydown=e=>{if(e.key==='Enter')flip()};
+
+/* ===== Slide 6: modal com detalhes ===== */
+const info={
+ pre:['Achado pré-natal','Uma gestante faz teste genético pré-natal não invasivo (NIPT) ou amniocentese por causa da idade materna. O exame mostra 47,XXX, sem alteração visível na ultrassonografia.'],
+ inf:['Primeira infância','A criança tem leve atraso no início da fala, dificuldade de coordenação motora fina e altura acima do esperado. A investigação genética revela o X extra.'],
+ adu:['Vida adulta','A mulher vive sem sintomas, com vida acadêmica, profissional e reprodutiva normais. Descobre a trissomia só em exames citogenéticos feitos por outro motivo.']};
+document.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{
+  document.getElementById('dt').textContent=info[b.dataset.k][0];
+  document.getElementById('dp').textContent=info[b.dataset.k][1];dlg.showModal()});
+document.getElementById('dc').onclick=()=>dlg.close();
+
+go((parseInt(location.hash.slice(1))||1)-1);
+</script>
+</body>
+</html>
